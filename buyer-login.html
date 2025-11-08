@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Login</title>
+    <!-- Include Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            overflow: hidden;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header h1 {
+            color: #333;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            color: #333;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group label {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #888;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus+label,
+        .input-group input:valid+label {
+            top: 0;
+            font-size: 12px;
+            color: #23a6d5;
+            background: white;
+            padding: 0 5px;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 30px;
+        }
+
+        .forgot-password a {
+            color: #23a6d5;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .forgot-password a:hover {
+            color: #e73c7e;
+            text-decoration: underline;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #23a6d5, #23d5ab);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .signup-link a {
+            color: #23a6d5;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .signup-link a:hover {
+            color: #e73c7e;
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .user-type-indicator {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #23a6d5;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="floating-elements" id="floatingElements"></div>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Buyer Interface</h1>
+            <p>Please sign in to your buyer account</p>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <input type="text" id="username" required>
+                <label for="username">Email Address</label>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="password" required>
+                <label for="password">Password</label>
+            </div>
+
+            <div class="forgot-password">
+                <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="login-button" id="loginButton">
+                Sign In
+            </button>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Signing in...</p>
+            </div>
+
+            <div class="signup-link">
+                Don't have an account? <a href="#" id="signupLink">Sign Up</a>
+            </div>
+
+            <div class="user-type-indicator" id="userTypeIndicator"></div>
+        </form>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://izvhayrqtiiyosrkgelk.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmhheXJxdGlpeW9zcmtnZWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MDk5NDIsImV4cCI6MjA3ODE4NTk0Mn0.wKY5HfvlpALL8ekvr-yyo0EFw7IWWEPPe1XM_39xetc';
+
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Create floating elements
+        const floatingContainer = document.getElementById('floatingElements');
+        const colors = ['rgba(35, 166, 213, 0.2)', 'rgba(231, 60, 126, 0.2)', 'rgba(35, 213, 171, 0.2)'];
+
+        for (let i = 0; i < 15; i++) {
+            const element = document.createElement('div');
+            element.classList.add('floating-element');
+
+            // Random size between 20 and 100px
+            const size = Math.random() * 80 + 20;
+            element.style.width = `${size}px`;
+            element.style.height = `${size}px`;
+
+            // Random position
+            element.style.left = `${Math.random() * 100}%`;
+            element.style.top = `${Math.random() * 100}%`;
+
+            // Random color
+            element.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+            // Random animation duration and delay
+            element.style.animationDuration = `${Math.random() * 20 + 10}s`;
+            element.style.animationDelay = `${Math.random() * 5}s`;
+
+            floatingContainer.appendChild(element);
+        }
+
+        // Login functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const signupLink = document.getElementById('signupLink');
+            const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+            const messageDiv = document.getElementById('message');
+            const userTypeIndicator = document.getElementById('userTypeIndicator');
+            const loginButton = document.getElementById('loginButton');
+            const loadingDiv = document.getElementById('loading');
+
+            // Show message function
+            function showMessage(text, type) {
+                messageDiv.textContent = text;
+                messageDiv.className = `message ${type}`;
+                messageDiv.style.display = 'block';
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+
+            // Show/hide loading state
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    loginButton.disabled = true;
+                    loadingDiv.style.display = 'block';
+                } else {
+                    loginButton.disabled = false;
+                    loadingDiv.style.display = 'none';
+                }
+            }
+
+            // Check if user exists in Supabase and show indicator
+            async function checkUserType() {
+                try {
+                    // Get current session to see if user is logged in
+                    const { data: { session }, error } = await supabase.auth.getSession();
+
+                    if (session && session.user) {
+                        // User is logged in, fetch their profile
+                        const { data: profile, error } = await supabase
+                            .from('profiles')
+                            .select('user_type, email')
+                            .eq('id', session.user.id)
+                            .single();
+
+                        if (profile && !error) {
+                            userTypeIndicator.textContent = `Note: You have a ${profile.user_type} account with email: ${profile.email}`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking user session:', error);
+                }
+            }
+
+            // Form submission with Supabase authentication
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const email = usernameInput.value.trim();
+                const password = passwordInput.value;
+
+                if (!email || !password) {
+                    showMessage('Please fill in all fields', 'error');
+                    return;
+                }
+
+                setLoading(true);
+
+                try {
+                    // Sign in with Supabase
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+
+                    if (error) {
+                        showMessage('Invalid email or password. Please try again.', 'error');
+                        console.error('Login error:', error);
+                    } else {
+                        showMessage('Login successful! Redirecting...', 'success');
+
+                        // Get user profile to determine user type
+                        const { data: profile, error: profileError } = await supabase
+                            .from('profiles')
+                            .select('user_type')
+                            .eq('id', data.user.id)
+                            .single();
+
+                        // Redirect based on user type
+                        setTimeout(() => {
+                            if (profile && profile.user_type === 'buyer') {
+                                window.location.href = 'buyer-interface.html';
+                            } else {
+                                window.location.href = 'farmer-main-interface.html';
+                            }
+                        }, 1500);
+                    }
+                } catch (error) {
+                    showMessage('An error occurred. Please try again.', 'error');
+                    console.error('Login error:', error);
+                } finally {
+                    setLoading(false);
+                }
+            });
+
+            // Redirect to buyer-signup.html when clicking signup link
+            signupLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                window.location.href = 'buyer-signup.html';
+            });
+
+            // Redirect to buyer-forgotpass.html when clicking forgot password link
+            forgotPasswordLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                window.location.href = 'buyer-forgotpass.html';
+            });
+
+            // Add keyboard shortcuts
+            usernameInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    passwordInput.focus();
+                }
+            });
+
+            passwordInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
+
+            // Auto-focus on username input when page loads
+            setTimeout(() => {
+                usernameInput.focus();
+                checkUserType();
+            }, 500);
+        });
+    </script>
+</body>
+
+</html>

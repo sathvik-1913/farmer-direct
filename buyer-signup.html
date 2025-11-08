@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Sign Up</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Copy the same styles from your login page */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        .signup-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .signup-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #23a6d5, #23d5ab);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="signup-container">
+        <h2>Create Buyer Account</h2>
+        <form id="signupForm">
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password (min. 6 characters)" required>
+            </div>
+            <button type="submit" class="signup-button">Sign Up</button>
+        </form>
+        <div id="message" style="margin-top: 20px;"></div>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="buyer-login.html">Already have an account? Login</a>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://izvhayrqtiiyosrkgelk.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmhheXJxdGlpeW9zcmtnZWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MDk5NDIsImV4cCI6MjA3ODE4NTk0Mn0.wKY5HfvlpALL8ekvr-yyo0EFw7IWWEPPe1XM_39xetc';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            if (password.length < 6) {
+                messageDiv.textContent = 'Password must be at least 6 characters long';
+                messageDiv.style.color = 'red';
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) {
+                    messageDiv.textContent = 'Error: ' + error.message;
+                    messageDiv.style.color = 'red';
+                } else {
+                    messageDiv.textContent = 'Signup successful! Check your email for confirmation.';
+                    messageDiv.style.color = 'green';
+
+                    // Clear form
+                    document.getElementById('signupForm').reset();
+                }
+            } catch (error) {
+                messageDiv.textContent = 'An error occurred: ' + error.message;
+                messageDiv.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Copy the same styles from your login page */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        .forgot-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .reset-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #23a6d5, #23d5ab);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="forgot-container">
+        <h2>Reset Your Password</h2>
+        <p>Enter your email address and we'll send you a password reset link.</p>
+        <form id="forgotForm">
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email" required>
+            </div>
+            <button type="submit" class="reset-button">Send Reset Link</button>
+        </form>
+        <div id="message" style="margin-top: 20px;"></div>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="buyer-login.html">Back to Login</a>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://izvhayrqtiiyosrkgelk.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dmhheXJxdGlpeW9zcmtnZWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MDk5NDIsImV4cCI6MjA3ODE4NTk0Mn0.wKY5HfvlpALL8ekvr-yyo0EFw7IWWEPPe1XM_39xetc';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const messageDiv = document.getElementById('message');
+
+            try {
+                const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: 'http://localhost:3000/update-password.html', // Change to your actual URL
+                });
+
+                if (error) {
+                    messageDiv.textContent = 'Error: ' + error.message;
+                    messageDiv.style.color = 'red';
+                } else {
+                    messageDiv.textContent = 'Password reset link sent to your email!';
+                    messageDiv.style.color = 'green';
+                }
+            } catch (error) {
+                messageDiv.textContent = 'An error occurred: ' + error.message;
+                messageDiv.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+
+</html>
